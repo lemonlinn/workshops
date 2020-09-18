@@ -1,0 +1,212 @@
+---
+title: "The title goes here"
+author: "Lemon Reimer"
+date: "3/2/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# Ignore this part
+```
+
+# This is a title
+
+### This is a subtitle
+
+This is a very **bold** and *slanted* sentence
+
+This looks a lot like `code`.
+
+```{r your first code block}
+# this is your first code block, where code can be written
+# anything after the '#' is a comment and will not run
+# try treating this section as a calculator. type 2 + 2, then click the green arrow
+```
+
+# Libraries and importing data
+
+```{r}
+library(dplyr)
+#library(DT)
+
+# load the 'datasets' package
+dplyr::filter()
+```
+
+```{r}
+test_data <- read.csv("https://vincentarelbundock.github.io/Rdatasets/csv/Ecdat/Caschool.csv")
+
+# import the data from https://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/winequality-red.csv and call it wine_red
+
+# import the data from https://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/winequality-white.csv and call it wine_white
+```
+
+# Subsetting data by columns
+
+```{r}
+col_keep <- c("distcod", "enrltot", "teachers", "calwpct", "mealpct", "computer", "testscr", "compstu", "expnstu", "str", "avginc", "elpct", "readscr", "mathscr")
+col_rmv <- c("X", "county", "district", "grspan")
+```
+
+### Subset using wanted column names
+
+```{r}
+sub1 <- test_data[col_keep]
+```
+
+```{r}
+sub2 <- subset(test_data, select = col_keep)
+```
+
+```{r}
+sub3 <- dplyr::select(test_data, col_keep)
+```
+
+### Subset using unwanted column names
+
+```{r}
+sub4 <- test_data[!names(test_data) %in% col_rmv]
+!names(test_data) %in% col_rmv
+```
+
+```{r}
+sub5 <- subset(test_data, select = -c(X, county, district, grspan))
+```
+
+```{r}
+sub6 <- select(test_data, -col_rmv)
+```
+
+# Subsetting data by boolean
+
+```{r}
+sub7 <- test_data[test_data$county == "Butte", col_keep]
+```
+
+```{r}
+sub8 <- subset(test_data, county == "Butte", select = col_keep)
+```
+
+```{r}
+sub9 <- select(filter(test_data, county == "Butte"), col_keep)
+```
+
+# Deleting/removing data
+
+```{r}
+# Experiment, try to figure out how to remove the "X" column
+# If you get stuck, go back up and re-run where we import the data to refresh the dataset
+# If that was too easy, try to remove rows based on a boolean
+```
+
+# Replacing data
+
+```{r}
+# Experiment again! Think to the last section and see what we should change about how we've been writing our code
+
+
+```
+
+# Calculating a new column
+
+### Dummy variable
+
+```{r}
+test_data$dummy <- ifelse(test_data$grspan == "KK-08", 1, 0)
+table(test_data$dummy, test_data$grspan)
+```
+
+```{r}
+test_data$cats <- ifelse((test_data$county == "Butte"), 1, ifelse((test_data$county == "Fresno"), 2, 0))
+```
+
+### Composite scoring
+
+```{r}
+# The column 'avginc' is an average of readscr and mathscr
+# Try to re-create this variable in a new column called 'avgs'
+
+test_data$avgs <- (test_data$mathscr + test_data$readscr)/2
+
+test_data$avgs <- test_data$mathscr + test_data$readscr
+
+test_data$avgs <- test_data$avgs/2
+```
+
+```{r}
+# Look up 'mutate' in the help tab and read up to "Useful functions available"
+```
+
+# Combining datasets
+
+### Adding rows
+
+```{r}
+# POP QUIZ!!
+# Add a new column to the wine_red and wine_white datasets called "color"
+# In wine_white, "color" = 1 and in wine_red, "color" = 0
+```
+
+```{r}
+wines <- rbind(wine_red, wine_white)
+```
+
+```{r}
+wines <- merge(wine_red, wine_white, all = T)
+```
+
+### Adding columns
+
+```{r}
+# You can ignore this if you want, I'm just building two datasets with random ACT/SAT scores
+
+df_ACT <- data.frame("id" = c(1:20), 
+                     "ACT_math" = c(floor(runif(20, min = 1, max = 36))), 
+                     "ACT_english" = c(floor(runif(20, min = 1, max = 36))), 
+                     "ACT_science" = c(floor(runif(20, min = 1, max = 36))), 
+                     "ACT_reading" = c(floor(runif(20, min = 1, max = 36))))
+df_ACT$ACT_avg <- (df_ACT$ACT_math + df_ACT$ACT_english + df_ACT$ACT_science + df_ACT$ACT_reading)/4
+
+df_SAT <- data.frame("id" = c(1:20), 
+                     "SAT_math" = c(floor(runif(20, min = 200, max = 800))), 
+                     "SAT_reading" = c(floor(runif(20, min = 200, max = 800))))
+df_SAT$SAT_total <- df_SAT$SAT_math + df_SAT$SAT_reading
+
+```
+
+```{r}
+df_SCORE <- cbind(df_ACT, df_SAT)
+```
+
+```{r}
+df_SCORE <- merge(df_ACT, df_SAT, by = "id")
+```
+
+```{r}
+df_SCORE <- full_join(df_ACT, df_SAT, by = "id")
+```
+
+# Dplyr pipelines
+
+```{r}
+# this is the same thing as select(test_data, col_keep) but in a pipeline
+
+sub3 <- test_data %>% select(col_keep)
+```
+
+```{r}
+# Try bulding a filter pipeline
+```
+
+```{r}
+# Try building a mutate pipeline
+```
+
+# Attaching a dplyr pipeline to DT
+
+```{r}
+# We'll do this together!
+```
+
